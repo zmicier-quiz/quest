@@ -1,0 +1,185 @@
+<html>
+<head>
+<title>Квест!</title>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+<style>
+
+  @font-face {
+    font-family: chalkFontFamily;
+    src: url("LC Chalk.ttf");
+  }
+  
+  body {
+    background-image: url("back-small2.png");
+	background-repeat: repeat;
+  }
+  .container {
+    width: 100%;
+	min-height: 100%;
+	min-width: 36em;
+    padding: 2.5em 2.5em;
+	box-sizing: border-box;
+  }
+  .white {
+    width: 100%;
+	min-height: 100%;
+    border-radius: 55px;
+    background: #FFFFFF;
+	box-sizing: border-box;
+  }
+  
+  .cntnr {
+	height: auto;
+	min-height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+	font-family: chalkFontFamily;
+  }
+  
+  .bckg {
+    min-width: 31em;
+    max-width: 80%;
+  }
+  
+  .txt {
+	font-size: 45px;
+  }
+  .inpt {
+	font-family: chalkFontFamily;
+	font-size: 3em;
+	border: 3px solid black;
+	margin-top: 0.2em;
+	max-width: 80%;
+	padding: 0.2em;
+  }
+  .header {
+    color: #18F2B2;
+    margin-top: 1em;
+    font-family: chalkFontFamily;
+	font-size: 55px;
+  }
+  #error {
+    text-align: center;
+    color: #ff0000;
+	margin-bottom: 1em;
+  }
+  .cnt {
+    text-align: center;
+  }
+  #d-inpt {
+    color: #18F2B2;
+  }
+	
+
+</style>
+</head>
+<body>
+<div class="container">
+<div class="white">
+<div class="cntnr">
+<div class="bckg">
+<div class="cnt header">
+Барные тайны
+</div>
+<div class="txt">
+Я не могу просто опубликовать рецепт Того Самого Коктейля: он станет достоянием общественности, что погубит его магию. И в то же время я боюсь, что что-либо забуду, или стану неверно трактовать, или попросту потеряю свои записи... Я решил разместить здесь только часть информации, да и ту надёжно защитить волшебным кодовым числом. Думаю, так мои заметки останутся в безопасности.<br>Для меня: введи в окошко ниже волшебное кодовое число и нажми «Готово»!
+</div>
+<div class="cnt">
+<input class='inpt' id='d-inpt' maxlength=10/>
+</div>
+<div class="cnt">
+<button class="inpt" id="sbmt-btn">Готово!</button>
+</div>
+<div id="error" class="txt"><br></div>
+</div>
+</div>
+</div>
+</div>
+<script>
+$( document ).ready(function() {
+    var i = 0;
+    const errors = [
+		"Не тот пароль!",
+		"Неверно!",
+		"Нет!",
+		"Не то число!",
+		"Ну что ты, забыл код?",
+		"Введи верное значение!",
+		"Что-то не то!",
+		"О, шикарно, ещё одна ошибка. Попробуй снова.",
+		"Удивительно, но этот код тоже неправильный.",
+		"Ну, по крайней мере, ты пытался. Но это не работает.",
+		"Ну что за ерунду ты вводишь?!",
+		"А это что за шедевр? Введи нормальный код.",
+		"Серьёзно? Это был твой лучший вариант?",
+		"Ну да, конечно... Этот код точно не подходит.",
+		"Если это код, то я королева Англии. Попробуй ещё раз.",
+		"О, я вижу, ты решил проверить моё терпение. Неверный код!",
+		"Ого, это что, новый вид шифрования? Попробуй обычный код.",
+		"Да ладно, ты же серьёзно не думал, что это сработает?",
+		"Ну вот, теперь ты просто издеваешься. Попробуй нормальный код.",
+		"Ты это серьёзно? Такой код точно не сработает.",
+		"Неудивительно, что код не подошёл. Что это вообще было?",
+		"Ой, извините, я не могу принять абракадабру за код.",
+		"Это код? Или ты просто случайно по клавишам стукнул?",
+		"Хорошая попытка, но нет. Введи правильный код.",
+		"Вот прям сейчас я в восхищении. Ну, почти. Код неверный.",
+		"Может, попробуешь вводить что-то разумное?",
+		"Это лучший код, который ты мог придумать?",
+		"Ты это серьёзно? Код неверный, попробуй ещё раз.",
+		"Если это был шутка, то она не смешная. Код неверный.",
+		"Ну давай, включи мозги и введи нормальный код.",
+		"Это кошка по клавиатуре пробежала?",
+		"Магия чисел тебе не помогла. Код неверный.",
+		"Интересно, кто-то вообще вводил такой код? Попробуй нормальный.",
+		"Это был интересный эксперимент, но он не удался.",
+		"Если бы этот код был правильным, я бы удивился. Но нет.",
+		"Не-а, не сегодня. Этот код неправильный."
+	]
+	const expected_hash = "e46bc064f8e92ac2c404b9871b2a4ef2";
+	const expected_qr_hashes = [
+	  "4b923ebd36ba67a525ea144ff8738b7d",
+	  "97875f4f37e5c4a8b5d900ba3c7ca721",
+	  "22e5590847330740b3358709f7fdbb0a"
+	 ]
+	$("#sbmt-btn").click(function() {
+		var input = $("#d-inpt").val().trim()
+		i = (i + 1) % errors.length
+		if (CryptoJS.MD5(input).toString() == expected_hash) {
+		  $("#error").html("Ого, это оно. Подожди, магия грузится.");
+		  sleep(2000).then(showQrs);
+		} else {
+		  $("#error").html(errors[i]);
+		}
+	});
+	
+	function showQrs() {
+	    var qrs = []
+	    for (var i = 1; i < 1001; i++) {
+		    const name = "qr" + i;
+		    if(expected_qr_hashes.includes(CryptoJS.MD5(name).toString())) {
+			   qrs.push(name)
+			}
+		}
+		$(".bckg").html("")
+		$(".bckg").append("<div class='cnt header'></div>")
+		$(".header").html("Ключи к барным тайнам")
+		$(".bckg").append("<div class='txt'></div>")
+		$(".txt").html("Здесь три ключа-портала. Только один приведёт к секретам Того Самого Коктейля и Того Самого Барного Искусства!")
+		$(".bckg").append("<div id='imgs' class='cnt'></div>")
+		qrs.forEach((qr) => {
+		  const filename = 'qrs/' + qr + '.png';
+		  $("#imgs").append("<img src='" + filename + "' alt='Без этой картинки квест может и не пройтись...' width='60%'> ")
+		});
+	}
+	
+	function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+	}
+});
+	</script>
+</body>
+</html>
